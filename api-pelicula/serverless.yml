@@ -3,18 +3,23 @@ service: api-pelicula
 
 provider:
   name: aws
-  runtime: python3.12	
-  # Default memory size for functions (default: 1024MB)
+  runtime: python3.12
+  region: us-east-1
   memorySize: 1024
-  timeout: 30
+  timeout: 29               # API Gateway solo permite 29 seg
   iam:
-    role: arn:aws:iam::606646193182:role/LabRole	
+    role: arn:aws:iam::606646193182:role/LabRole   # Este es el rol permitido en Academy
   environment:
     TABLE_NAME: ${sls:stage}-t_peliculas
+  disableRollback: true     # Evita que CloudFormation intente revertir recursos no permitidos
+
+package:
+  individually: true
 
 functions:
   crear:
     handler: CrearPelicula.lambda_handler
+    timeout: 29
     events:
       - http:
           path: /pelicula/crear
@@ -24,7 +29,7 @@ functions:
 
 resources:
   Resources:
-    TablaComentarios:
+    TablaPeliculas:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME}
@@ -38,5 +43,7 @@ resources:
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE
-        # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-python-requirements
