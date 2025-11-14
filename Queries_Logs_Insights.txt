@@ -1,25 +1,25 @@
-fields @timestamp, @message
+fields @timestamp, tipo, log_datos.mensaje
 | sort @timestamp asc
 
-fields @timestamp, @message, @billedDuration, @memorySize, @requestId
+filter tipo = "INFO"
+| fields @timestamp,
+         log_datos.pelicula.pelicula_datos.nombre,
+         log_datos.pelicula.pelicula_datos.genero,
+         log_datos.pelicula.pelicula_datos.fecha,
+         log_datos.pelicula.pelicula_datos.duracion_minutos
 | sort @timestamp asc
-| filter @type = "REPORT"
 
-fields @timestamp, @message, pelicula_datos.nombre, pelicula_datos.genero, pelicula_datos.fecha, pelicula_datos.duracion_minutos	
-| sort @timestamp asc
-| filter tenant_id = "CINEPLANET"
+filter tipo = "INFO"
+| fields log_datos.pelicula.pelicula_datos.nombre,
+         log_datos.pelicula.pelicula_datos.duracion_minutos
+| sort log_datos.pelicula.pelicula_datos.duracion_minutos desc
 
-fields @timestamp, @message, pelicula_datos.nombre, pelicula_datos.genero, pelicula_datos.fecha, pelicula_datos.duracion_minutos	
-| sort pelicula_datos.duracion_minutos desc
-| filter tenant_id = "CINEPLANET"
+filter tipo = "INFO"
+  and log_datos.pelicula.pelicula_datos.genero = "Terror"
+| fields @timestamp, log_datos.pelicula.pelicula_datos.nombre
 
-fields @timestamp, @message, pelicula_datos.nombre, pelicula_datos.genero, pelicula_datos.fecha, pelicula_datos.duracion_minutos	
-| sort pelicula_datos.duracion_minutos desc
-| filter tenant_id = "CINEPLANET" and pelicula_datos.genero = "Terror"
+filter tipo = "INFO"
+| stats count(*) by log_datos.pelicula.pelicula_datos.genero
 
-filter tenant_id = "CINEPLANET"
-| stats count(*) by pelicula_datos.genero as genero
-
-fields @timestamp, @message
-| sort @timestamp asc
-| filter @message like "ERROR"
+filter tipo = "ERROR"
+| fields @timestamp, log_datos.mensaje
